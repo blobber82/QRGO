@@ -1,0 +1,5 @@
+{
+  "name": "QRGO",
+  "description": "A simple and elegant QR code generator with customization options.",
+  "requestFramePermissions": []
+}
