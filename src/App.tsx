@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import { Download, Type, Settings, RefreshCw, Mail, User, Info, Globe, FileText, FileCode, MapPin, ExternalLink } from 'lucide-react';
+import { Download, Type, Settings, RefreshCw, Mail, User, Info, Globe, FileText, FileCode, MapPin, ExternalLink, Image as ImageIcon, Upload, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 type ContentType = 'url' | 'text' | 'email' | 'contact' | 'location';
@@ -37,6 +37,8 @@ export default function App() {
   const [includeMargin, setIncludeMargin] = useState(true);
   const [level, setLevel] = useState<'L' | 'M' | 'Q' | 'H'>('M');
   const [showInfo, setShowInfo] = useState(false);
+  const [logo, setLogo] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState(20);
   
   const qrCanvasRef = useRef<HTMLDivElement>(null);
   const qrSvgRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,32 @@ export default function App() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setLogo(event.target?.result as string);
+        // Force high error correction for logos
+        if (level === 'L' || level === 'M') {
+          setLevel('Q');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogo(null);
+  };
+
+  const imageSettings = logo ? {
+    src: logo,
+    height: (size * logoSize) / 100,
+    width: (size * logoSize) / 100,
+    excavate: true,
+  } : undefined;
 
   const downloadPNG = () => {
     const canvas = qrCanvasRef.current?.querySelector('canvas');
@@ -142,7 +170,7 @@ export default function App() {
                   onClick={() => setContentType(type.id as ContentType)}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-sm font-semibold transition-all ${
                     contentType === type.id 
-                    ? 'bg-white text-indigo-600 shadow-sm' 
+                    ? 'bg-white text-[#22C55E] shadow-sm' 
                     : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                   }`}
                 >
@@ -177,7 +205,7 @@ export default function App() {
                           value={formData.url}
                           onChange={handleInputChange}
                           placeholder="https://example.com"
-                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                          className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#22C55E] outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -191,7 +219,7 @@ export default function App() {
                         value={formData.text}
                         onChange={handleInputChange}
                         placeholder="Type your message here..."
-                        className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+                        className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#22C55E] outline-none transition-all resize-none"
                       />
                     </div>
                   )}
@@ -206,7 +234,7 @@ export default function App() {
                           value={formData.email}
                           onChange={handleInputChange}
                           placeholder="hello@example.com"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div>
@@ -217,7 +245,7 @@ export default function App() {
                           value={formData.subject}
                           onChange={handleInputChange}
                           placeholder="Inquiry about..."
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div>
@@ -227,7 +255,7 @@ export default function App() {
                           value={formData.message}
                           onChange={handleInputChange}
                           placeholder="Your email body..."
-                          className="w-full h-24 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                          className="w-full h-24 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none resize-none"
                         />
                       </div>
                     </div>
@@ -242,7 +270,7 @@ export default function App() {
                           name="firstName"
                           value={formData.firstName}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -252,7 +280,7 @@ export default function App() {
                           name="lastName"
                           value={formData.lastName}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -262,7 +290,7 @@ export default function App() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -272,7 +300,7 @@ export default function App() {
                           name="workPhone"
                           value={formData.workPhone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -282,7 +310,7 @@ export default function App() {
                           name="org"
                           value={formData.org}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -292,7 +320,7 @@ export default function App() {
                           name="position"
                           value={formData.position}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-2">
@@ -302,7 +330,7 @@ export default function App() {
                           name="website"
                           value={formData.website}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-2">
@@ -311,7 +339,7 @@ export default function App() {
                           name="address"
                           value={formData.address}
                           onChange={handleInputChange}
-                          className="w-full h-20 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+                          className="w-full h-20 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none resize-none"
                         />
                       </div>
                     </div>
@@ -320,15 +348,15 @@ export default function App() {
                   {contentType === 'location' && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-2">
-                          <p className="text-xs text-indigo-700 font-medium leading-relaxed">
+                        <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-2">
+                          <p className="text-xs text-green-700 font-medium leading-relaxed">
                             Enter coordinates below to generate a Google Maps link. Scanning the QR code will open the location and offer directions.
                           </p>
                           <a 
                             href="https://www.google.com/maps" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                            className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-[#22C55E] hover:text-green-800 transition-colors"
                           >
                             <ExternalLink size={14} />
                             Find coordinates on Google Maps
@@ -344,7 +372,7 @@ export default function App() {
                           value={formData.latitude}
                           onChange={handleInputChange}
                           placeholder="e.g. 40.4168"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                       <div className="col-span-1">
@@ -355,7 +383,7 @@ export default function App() {
                           value={formData.longitude}
                           onChange={handleInputChange}
                           placeholder="e.g. -3.7038"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#22C55E] outline-none"
                         />
                       </div>
                     </div>
@@ -367,7 +395,7 @@ export default function App() {
             {/* Customization Card */}
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
               <div className="flex items-center gap-2 mb-8">
-                <Settings className="text-indigo-600" size={20} />
+                <Settings className="text-[#22C55E]" size={20} />
                 <h3 className="font-bold text-slate-800">Design & Quality</h3>
               </div>
 
@@ -386,6 +414,52 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Logo Image (SVG)</label>
+                    {!logo ? (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 hover:bg-slate-100 hover:border-[#22C55E] transition-all cursor-pointer group">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-3 text-slate-400 group-hover:text-[#22C55E]" />
+                          <p className="text-xs text-slate-500 font-medium">Click to upload SVG</p>
+                        </div>
+                        <input type="file" className="hidden" accept=".svg" onChange={handleLogoUpload} />
+                      </label>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
+                              <img src={logo} alt="Logo preview" className="max-w-full max-h-full object-contain" />
+                            </div>
+                            <span className="text-xs font-bold text-slate-600">Logo Active</span>
+                          </div>
+                          <button 
+                            onClick={removeLogo}
+                            className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                        
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logo Size</label>
+                            <span className="text-[10px] font-bold text-[#22C55E]">{logoSize}%</span>
+                          </div>
+                          <input 
+                            type="range" 
+                            min="10" 
+                            max="35" 
+                            step="1"
+                            value={logoSize} 
+                            onChange={(e) => setLogoSize(parseInt(e.target.value))}
+                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -394,7 +468,7 @@ export default function App() {
                       <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Error Correction</label>
                       <button 
                         onClick={() => setShowInfo(!showInfo)}
-                        className="text-slate-400 hover:text-indigo-600 transition-colors"
+                        className="text-slate-400 hover:text-[#22C55E] transition-colors"
                       >
                         <Info size={16} />
                       </button>
@@ -404,7 +478,7 @@ export default function App() {
                       <motion.div 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="mb-4 p-3 bg-indigo-50 rounded-xl text-[11px] text-indigo-700 leading-relaxed border border-indigo-100"
+                        className="mb-4 p-3 bg-green-50 rounded-xl text-[11px] text-green-700 leading-relaxed border border-green-100"
                       >
                         Error correction allows the QR code to be read even if it's partially damaged or covered. 
                         <strong> L (7%)</strong> is smallest, <strong>H (30%)</strong> is most resilient but more complex.
@@ -418,7 +492,7 @@ export default function App() {
                           onClick={() => setLevel(l as any)}
                           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                             level === l 
-                            ? 'bg-white text-indigo-600 shadow-sm' 
+                            ? 'bg-white text-[#22C55E] shadow-sm' 
                             : 'text-slate-500 hover:text-slate-700'
                           }`}
                         >
@@ -432,7 +506,7 @@ export default function App() {
                     <span className="text-sm font-medium text-slate-600">Include Margin</span>
                     <button 
                       onClick={() => setIncludeMargin(!includeMargin)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${includeMargin ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${includeMargin ? 'bg-[#22C55E]' : 'bg-slate-300'}`}
                     >
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${includeMargin ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
@@ -470,6 +544,7 @@ export default function App() {
                             bgColor={bgColor}
                             level={level}
                             includeMargin={includeMargin}
+                            imageSettings={imageSettings}
                             style={{ width: '100%', height: '100%' }}
                           />
                         </motion.div>
@@ -493,19 +568,20 @@ export default function App() {
                           bgColor={bgColor}
                           level={level}
                           includeMargin={includeMargin}
+                          imageSettings={imageSettings}
                         />
                       )}
                     </div>
                     
                     {/* Decorative background pattern */}
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#22C55E 1px, transparent 0)', backgroundSize: '20px 20px' }} />
                   </div>
                 </div>
 
                 <div className="w-full mt-8 px-2">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Output Size</label>
-                    <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">{size}px</span>
+                    <span className="text-xs font-bold text-[#22C55E] bg-green-50 px-2 py-1 rounded-md">{size}px</span>
                   </div>
                   <input 
                     type="range" 
@@ -514,7 +590,7 @@ export default function App() {
                     step="32"
                     value={size} 
                     onChange={(e) => setSize(parseInt(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#22C55E]"
                   />
                   <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-400">
                     <span>128px</span>
@@ -527,7 +603,7 @@ export default function App() {
                     <button
                       onClick={downloadPNG}
                       disabled={!qrValue}
-                      className="py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]"
+                      className="py-4 bg-[#22C55E] hover:bg-green-700 disabled:bg-slate-200 disabled:cursor-not-allowed text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-200 active:scale-[0.98]"
                     >
                       <Download size={18} />
                       PNG
@@ -548,12 +624,12 @@ export default function App() {
               </div>
               
               {/* Pro Tip Card */}
-              <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-200">
+              <div className="bg-[#22C55E] rounded-3xl p-6 text-white shadow-lg shadow-green-200">
                 <h4 className="font-bold mb-2 flex items-center gap-2">
                   <Info size={18} />
                   Pro Tip
                 </h4>
-                <p className="text-indigo-100 text-sm leading-relaxed">
+                <p className="text-green-100 text-sm leading-relaxed">
                   SVG format is perfect for professional printing as it can be scaled to any size without losing quality.
                 </p>
               </div>
