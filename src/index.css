@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@layer base {
+  html {
+    @apply transition-colors duration-300;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 transition-colors duration-300 min-h-screen;
+  }
+  .dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
